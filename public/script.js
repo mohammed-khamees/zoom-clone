@@ -1,10 +1,8 @@
 const socket = io();
 const videoGrid = document.getElementById('video-grid');
 
-const myPeer = new Peer(undefined, {
-	path: '/peerjs',
-	host: '/',
-	port: '3030',
+var myPeer = new Peer(undefined, {
+	port: '443',
 });
 
 let myVideoStream;
@@ -19,7 +17,9 @@ navigator.mediaDevices
 	.then((stream) => {
 		myVideoStream = stream;
 		addVideoStream(myVideo, stream);
+
 		myPeer.on('call', (call) => {
+			console.log(call);
 			call.answer(stream);
 			const video = document.createElement('video');
 			call.on('stream', (userVideoStream) => {
@@ -30,15 +30,16 @@ navigator.mediaDevices
 		socket.on('user-connected', (userId) => {
 			connectToNewUser(userId, stream);
 		});
-		// input value
+
 		let text = $('input');
-		// when press enter send message
+
 		$('html').keydown(function (e) {
 			if (e.which == 13 && text.val().length !== 0) {
 				socket.emit('message', text.val());
 				text.val('');
 			}
 		});
+
 		socket.on('createMessage', (message) => {
 			$('ul').append(`<li class="message"><b>user</b><br/>${message}</li>`);
 			scrollToBottom();
@@ -59,6 +60,7 @@ function connectToNewUser(userId, stream) {
 	call.on('stream', (userVideoStream) => {
 		addVideoStream(video, userVideoStream);
 	});
+
 	call.on('close', () => {
 		video.remove();
 	});
@@ -75,7 +77,7 @@ function addVideoStream(video, stream) {
 }
 
 const scrollToBottom = () => {
-	var d = $('.main__chat_window');
+	let d = $('.main__chat_window');
 	d.scrollTop(d.prop('scrollHeight'));
 };
 
